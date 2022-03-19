@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useReducer } from "react";
-import Formulario from "../components/Formulario";
-import ListaTareas from "../components/ListaTareas";
-import tareas from "../utils/tareas";
-import { tareasReducer } from "../helpers/tareasReducer";
-import { useLocalStorage } from "../hooks/useLocalStorage";
-import { userInfo } from "../slices/userSlice";
+import Formulario from "../components/Formulario.js";
+import ListaTareas from "../components/ListaTareas.js";
+// import tareas from "../utils/tareas";
+// import { tareasReducer } from "../helpers/tareasReducer";
+// import { useLocalStorage } from "../hooks/useLocalStorage";
+// import { userInfo } from "../slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createTodoAsync,
