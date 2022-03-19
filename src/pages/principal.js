@@ -3,37 +3,40 @@ import Formulario from "../components/Formulario";
 import ListaTareas from "../components/ListaTareas";
 import tareas from "../utils/tareas";
 import { tareasReducer } from "../helpers/tareasReducer";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { userInfo } from "../slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createTodoAsync,
+  deleteTodoAsync,
+  getTodosByUserAsync,
+  todosByUser,
+  updateTodoAsync,
+} from "../slices/todoSlice";
+import { Button } from "react-bootstrap";
 
 export default function Principal() {
-  // Estados del componente
-  const [todos, dispatch] = useReducer(tareasReducer, []);
+  const dispatch = useDispatch();
   const [editable, setEditable] = useState(null);
-
+  // const user = useSelector(userInfo);
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log("user", user);
+  const todos = useSelector(todosByUser);
+  console.log("todos", todos);
   useEffect(() => {
-    dispatch({
-      type: "init",
-      payload: tareas,
-    });
+    dispatch(getTodosByUserAsync(user.id));
   }, []);
 
   // función para agregar una nueva tarea
-  const handleRegistrar = (tarea) => {
-    // Validación si hay tareas para evitar error
-    const ultimoId = todos[todos.length - 1]?.id ?? 0;
-    const todo = { id: ultimoId + 1, titulo: tarea, completado: false };
-    const action = {
-      type: "registrar",
-      payload: todo,
-    };
-    dispatch(action);
+  const handleRegistrar = async (todo) => {
+    await dispatch(createTodoAsync({ todo, id: user.id }));
+    dispatch(getTodosByUserAsync(user.id));
   };
 
   // función para cambiar el estado de una tarea
-  const handleToggle = (id) => {
-    dispatch({
-      type: "toggle",
-      payload: id,
-    });
+  const handleToggle = async (id, done) => {
+    await dispatch(updateTodoAsync({ id, done: !done }));
+    dispatch(getTodosByUserAsync(user.id));
   };
 
   // funcion para recibir una tarea que se va a editar
@@ -42,30 +45,26 @@ export default function Principal() {
   };
 
   // funcion para editar una tarea
-  const handleEditar = (nuevaTarea) => {
-    const action = {
-      type: "editar",
-      payload: nuevaTarea,
-    };
+  const handleEditar = async ({ id, title }) => {
+    await dispatch(updateTodoAsync({ id, title }));
+    dispatch(getTodosByUserAsync(user.id));
 
-    dispatch(action);
     setEditable(null);
   };
 
   // Eliminar una tarea
-  const handleEliminar = (id) => {
-    const action = {
-      type: "eliminar",
-      payload: id,
-    };
-    dispatch(action);
+  const handleEliminar = async (id) => {
+    await dispatch(deleteTodoAsync(id));
+    dispatch(getTodosByUserAsync(user.id));
   };
 
   // Renderizar el componente
   return (
     <>
       <div className="container">
-        <h1 className="text-center mt-5 mb-5">Lista de tareas</h1>
+        <h1 className="text-center mt-5 mb-5">
+          Lista de tareas - {user?.name}
+        </h1>
         <Formulario
           handleRegistrar={handleRegistrar}
           handleEditar={handleEditar}
@@ -73,11 +72,22 @@ export default function Principal() {
         />
         <ListaTareas
           // listaTareas={listaTareas}
-          listaTareas={todos}
+          todos={todos}
           handleToggle={handleToggle}
           handleEliminar={handleEliminar}
           recibirEditable={recibirEditable}
         />
+        <Button
+          variant="danger"
+          type="button"
+          onClick={() => {
+            localStorage.removeItem("user");
+            window.location = "/";
+          }}
+          className="mt-2 mb-2"
+        >
+          Cerrar sesión
+        </Button>
       </div>
     </>
   );
