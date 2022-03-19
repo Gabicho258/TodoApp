@@ -1,4 +1,5 @@
-const API_SERVER = "http://localhost:5000";
+const API_SERVER = "https://todo-app-v2.herokuapp.com";
+// const API_SERVER = "http://localhost:5000";
 
 const ENDPOINTS = {
   GET_ONE_USER: "/api/users",
